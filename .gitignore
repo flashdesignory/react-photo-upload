@@ -1,0 +1,9 @@
+dist/
+node_modules/
+.DS_Store
+public/*bundle*
+public/*styles*
+*.map
+*.bundle.js
+*.styles.css
+.sass-cache/

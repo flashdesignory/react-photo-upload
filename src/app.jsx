@@ -13,9 +13,9 @@ class App extends Component {
       <div className="container">
         <Switch location={location}>
 					<Route exact path="/" component={SplashPage} />
-					<Route path="/about" component={UploadPage}/>
-          <Route path="/about" component={WebcamPage}/>
-          <Route path="/about" component={EditPage}/>
+					<Route path="/upload" component={UploadPage}/>
+          <Route path="/webcam" component={WebcamPage}/>
+          <Route path="/edit" component={EditPage}/>
           <Route component={NotFound}/>
         </Switch>
       </div>

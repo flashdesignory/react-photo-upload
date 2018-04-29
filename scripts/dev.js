@@ -31,6 +31,7 @@ const server = new webpackDevServer(compiler, {
 	historyApiFallback: true,
 	publicPath: '',
 	inline: true,
+	https: true,//using https for webcam
 	hot: true
 });
 
@@ -39,10 +40,13 @@ server.listen(port, host, function(err, result){
 		return console.log(err);
 	}
 
-	var url = 'http://' + host + ':' + port;
+	//using https for webcam
+	var url = 'https://' + host + ':' + port;
 
 	console.log();
 	console.log(chalk.green("*******************************************"));
+	console.log();
+	console.log(chalk.cyan("using https for webcam features - add exception if prompted"));
 	console.log();
 	console.log(chalk.cyan("listening at: " + url));
 	console.log();

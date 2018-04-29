@@ -10,14 +10,15 @@ import './app.scss';
 
 class App extends Component {
   render(){
+    const { location, history } = this.props;
     return (
       <div className="container">
         <Header/>
         <Switch location={location}>
-					<Route exact path="/" component={SplashPage} />
-					<Route path="/upload" component={UploadPage}/>
-          <Route path="/webcam" component={WebcamPage}/>
-          <Route path="/edit" component={EditPage}/>
+					<Route exact path="/" render={() => <SplashPage history={history}/>}/>
+					<Route path="/upload" render={() => <UploadPage history={history}/>}/>
+          <Route path="/webcam" render={() => <WebcamPage history={history}/>}/>
+          <Route path="/edit" render={() => <EditPage history={history}/>}/>
           <Route component={NotFound}/>
         </Switch>
       </div>
@@ -25,4 +26,4 @@ class App extends Component {
   }
 }
 
-export default App;
+export default withRouter(App);

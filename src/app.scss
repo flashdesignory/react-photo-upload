@@ -1,22 +1,14 @@
-$form-bg: #13232f;
-$white: #ffffff;
-$gray-light: #a0b3b0;
+@import 'colors';
+@import 'ui';
 
 .container{
   background:rgba($form-bg,.9);
   padding: 40px;
   width:100%;
   max-width:600px;
-  height:400px;
+  height:500px;
   margin: 0 auto;
   border-radius:4px;
   color:$white;
   box-shadow:0 4px 10px 4px rgba($form-bg,.3);
-}
-
-.separator{
-  width:100%;
-  height:1px;
-  background-color:$gray-light;
-  margin: 40px 0;
 }

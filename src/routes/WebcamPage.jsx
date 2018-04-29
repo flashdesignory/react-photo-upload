@@ -7,7 +7,7 @@ class WebcamPage extends Component{
     this.checkSupport();
     this.state = {
       imageData:null,
-      err: ""
+      error: ""
     }
     this.handleOnClick = this.handleOnClick.bind(this);
   }
@@ -32,8 +32,7 @@ class WebcamPage extends Component{
       })
     });
   }
-  handleOnClick(e){
-    console.log('handleOnClick()');
+  takePicture(){
     let video = this.refs.videoElement;
     let scale = 1;
     let canvas = document.createElement("canvas");
@@ -46,17 +45,47 @@ class WebcamPage extends Component{
       imageData : canvas.toDataURL()
     })
   }
+  handleOnClick(e){
+    console.log('handleOnClick()');
+    switch(e.target.id){
+      case "snap-button":
+        this.takePicture();
+        break;
+      case "retake-button":
+        this.setState({
+          imageData:null,
+          error: ""
+        }, this.displayVideo);
+        break;
+    }
+  }
   componentDidMount(){
     this.displayVideo();
   }
-  render(){
-    return (
-      <div className="page webcam">
+  displayActionButton(){
+    if(this.state.imageData){
+      return (
+        <button className="button wide retake"
+          id="retake-button"
+          onClick={this.handleOnClick}>
+          <span className="icon-camera button-icon"></span>
+          <span className="button-text">retake picture</span></button>
+      )
+    }else{
+      return (
         <button className="button wide snap"
           id="snap-button"
           onClick={this.handleOnClick}>
           <span className="icon-camera button-icon"></span>
           <span className="button-text">snap picture</span></button>
+      )
+    }
+  }
+  render(){
+    return (
+      <div className="page webcam">
+        {this.displayActionButton()}
+
           <div className="image-container">
             <div className="image-content">
               {

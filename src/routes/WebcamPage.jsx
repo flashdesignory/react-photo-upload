@@ -68,7 +68,7 @@ class WebcamPage extends Component{
         <button className="button wide retake"
           id="retake-button"
           onClick={this.handleOnClick}>
-          <span className="icon-camera button-icon"></span>
+          <span className="icon-refresh button-icon"></span>
           <span className="button-text">retake picture</span></button>
       )
     }else{

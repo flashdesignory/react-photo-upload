@@ -24,8 +24,16 @@ class SplashPage extends Component{
   render(){
     return (
       <div className="page splash">
-        <button className="button block upload" id="upload-button" onClick={this.handleOnClick}>upload image</button>
-        <button className="button block webcam" id="webcam-button" onClick={this.handleOnClick}>use webcam</button>
+        <button className="button wide upload"
+          id="upload-button"
+          onClick={this.handleOnClick}>
+          <span className="icon-picture button-icon"></span>
+          <span className="button-text">upload image</span></button>
+        <button className="button wide webcam"
+          id="webcam-button"
+          onClick={this.handleOnClick}>
+          <span className="icon-camera button-icon"></span>
+          <span className="button-text">use webcam</span></button>
       </div>
     )
   }

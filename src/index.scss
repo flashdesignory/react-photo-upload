@@ -15,4 +15,17 @@ html, body{
   background-color:$body-bg;
   min-width: 320px;
   min-height: 320px;
+  font-family: arial;
+}
+
+a{
+	border-style:none;
+	outline:0;
+	text-decoration: none;
+	&:active{
+		outline:none;
+	}
+	&:focus{
+		outline:none;
+	}
 }

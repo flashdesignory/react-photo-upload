@@ -4,7 +4,7 @@ import './SplashPage.scss';
 const SplashPage = (props) => {
   return (
     <div className="page splash">
-      <h1>Splash Page</h1>
+      <h2>Splash Page</h2>
     </div>
   )
 }

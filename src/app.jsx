@@ -5,12 +5,14 @@ import UploadPage from './routes/UploadPage';
 import WebcamPage from './routes/WebcamPage';
 import EditPage from './routes/EditPage';
 import NotFound from './routes/NotFound';
+import Header from './modules/header/Header';
 import './app.scss';
 
 class App extends Component {
   render(){
     return (
       <div className="container">
+        <Header/>
         <Switch location={location}>
 					<Route exact path="/" component={SplashPage} />
 					<Route path="/upload" component={UploadPage}/>

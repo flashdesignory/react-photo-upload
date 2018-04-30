@@ -6,7 +6,10 @@ class UploadPage extends Component{
   constructor(props){
     super(props);
     this.state = {
-      imageData:null
+      imageData:null,
+      imageId:"",
+      imageWidth:0,
+      imageHeight:0
     }
     this.maxFilesize = 4000000;
     this.checkSupport();
@@ -22,6 +25,8 @@ class UploadPage extends Component{
     this.handleDragLeave = this.handleDragLeave.bind(this);
     this.handleDragOver = this.handleDragOver.bind(this);
     this.handleDrop = this.handleDrop.bind(this);
+
+    this.handleImageLoaded  = this.handleImageLoaded.bind(this);
   }
   checkSupport(){
     if (window.File && window.FileReader && window.FileList && window.Blob) {
@@ -40,7 +45,9 @@ class UploadPage extends Component{
       }
     }
 
-    if(selectedFiles.length > 0) this.readImage(selectedFiles[0]);
+    if(selectedFiles.length > 0){
+      this.setState({imageId:selectedFiles[0].name}, () => this.readImage(selectedFiles[0]))
+    }
   }
   readImage(file){
     console.log("readImage()");
@@ -62,10 +69,21 @@ class UploadPage extends Component{
     console.log(message);
   }
   handleOnLoaded(e){
-    console.log(e.target.result);
+    //console.log(e.target.result);
+    let image = new Image();
+    image.id = this.state.imageId;
+    image.addEventListener('load', this.handleImageLoaded);
+    image.src = e.target.result;
+
     this.setState({
       imageData : e.target.result
     })
+  }
+  handleImageLoaded(e){
+    if(e.target.id === this.state.imageId){
+      console.log(e.target.width, e.target.height);
+      this.setState({imageWidth:e.target.width, imageHeight:e.target.height})
+    }
   }
   handleOnAbort(e){
     console.log("handleOnAbort()");

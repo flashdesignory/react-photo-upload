@@ -15,6 +15,10 @@ class ResultPage extends Component{
       case "next-button":
         this.props.history.push('/');
         break;
+      case "save-button":
+        e.target.href = this.props.imageData.src;
+        e.target.download = "myphoto.png";
+        break;
     }
   }
   render(){
@@ -22,6 +26,12 @@ class ResultPage extends Component{
       <div className="page result">
         <div className="buttons-container">
           <div className="action-buttons">
+            <a className={ this.props.imageData ? "button wide save" : "button wide save disabled" }
+              id="save-button"
+              onClick={this.handleOnClick}>
+              <span className="icon-folder-download button-icon"></span>
+              <span className="button-text">save</span>
+            </a>
           </div>
           <div className="navigation-buttons">
             <button className={ this.props.imageData ? "button wide next" : "button wide next disabled" }

@@ -7,9 +7,12 @@ class WebcamPage extends Component{
     this.checkSupport();
     this.state = {
       imageData:null,
+      isAvailable:false,
       error: ""
     }
     this.handleOnClick = this.handleOnClick.bind(this);
+    this.handleOnPlay = this.handleOnPlay.bind(this);
+    this.handleOnPause = this.handleOnPause.bind(this);
   }
   checkSupport(){
     if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
@@ -22,8 +25,8 @@ class WebcamPage extends Component{
     let video = this.refs.videoElement;
     navigator.mediaDevices.getUserMedia({ video: true })
     .then(function(stream) {
-        video.srcObject = stream;
-        video.play();
+      video.srcObject = stream;
+      video.play();
     })
     .catch(err => {
       console.log("error: " + err)
@@ -35,14 +38,32 @@ class WebcamPage extends Component{
   takePicture(){
     let video = this.refs.videoElement;
     let scale = 1;
-    let canvas = document.createElement("canvas");
-        canvas.width = video.videoWidth * scale;
-        canvas.height = video.videoHeight * scale;
-        canvas.getContext('2d')
-              .drawImage(video, 0, 0, canvas.width, canvas.height);
 
+    let canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth * scale;
+    canvas.height = video.videoHeight * scale;
+    let context = canvas.getContext('2d');
+    context.translate(video.videoWidth, 0);
+    context.scale(-1,1);
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    let data = canvas.toDataURL();
+    let image = new Image();
+    image.src = data;
+
+    this.props.setImageData(image);
+    this.setState({imageData : image})
+  }
+  handleOnPlay(e){
+    console.log("handleOnPlay()");
     this.setState({
-      imageData : canvas.toDataURL()
+      isAvailable:true
+    })
+  }
+  handleOnPause(e){
+    console.log("handleOnPause()");
+    this.setState({
+      isAvailable:false
     })
   }
   handleOnClick(e){
@@ -57,6 +78,9 @@ class WebcamPage extends Component{
           error: ""
         }, this.displayVideo);
         break;
+      case "next-button":
+        this.props.history.push('/edit');
+        break;
     }
   }
   componentDidMount(){
@@ -69,36 +93,52 @@ class WebcamPage extends Component{
           id="retake-button"
           onClick={this.handleOnClick}>
           <span className="icon-refresh button-icon"></span>
-          <span className="button-text">retake picture</span></button>
+          <span className="button-text">retake picture</span>
+        </button>
       )
     }else{
       return (
-        <button className="button wide snap"
+        <button className={ this.state.isAvailable ? "button wide snap" : "button wide snap disabled"}
           id="snap-button"
           onClick={this.handleOnClick}>
           <span className="icon-camera button-icon"></span>
-          <span className="button-text">snap picture</span></button>
+          <span className="button-text">snap picture</span>
+        </button>
       )
     }
   }
   render(){
     return (
       <div className="page webcam">
-        {this.displayActionButton()}
-
-          <div className="image-container">
-            <div className="image-content">
-              {
-                this.state.imageData ?
-                <img src={ this.state.imageData }/> :
-                <video id="video" ref="videoElement" width="100%" height="100%" autoPlay></video>
+        <div className="buttons-container">
+          <div className="action-buttons">
+            {this.displayActionButton()}
+          </div>
+          <div className="navigation-buttons">
+            <button className={ this.state.imageData ? "button wide next" : "button wide next disabled"}
+              id="next-button"
+              onClick={this.handleOnClick}>
+              <span className="icon-arrow-right button-icon"></span>
+              <span className="button-text">next</span>
+            </button>
+          </div>
+        </div>
+        <div className="image-container">
+          <div className="image-content">
+            {
+              this.state.imageData ?
+              <img src={ this.state.imageData.src }/> :
+                <video id="video" ref="videoElement"
+                  width="1280" height="720"
+                  autoPlay
+                  onPlaying={this.handleOnPlay}
+                  onPause={this.handleOnPause}></video>
               }
             </div>
             <div className="error">{ this.state.error }</div>
           </div>
-
-      </div>
-    )
+        </div>
+      )
+    }
   }
-}
-export default WebcamPage;
+  export default WebcamPage;

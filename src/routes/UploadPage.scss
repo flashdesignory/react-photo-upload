@@ -1,21 +1,17 @@
-.image-container{
-  width:100%;
-  background-color:#ffffff;
-  margin:0 auto;
-  position: relative;
-  overflow: hidden;
-  &:after {
-    content: "";
-    display: block;
-    padding-bottom: 75%;
-  }
-  .image-content{
-    position: absolute;
-    width:100%;
-    height:100%;
-    img{
-      width:100%;
-      height:auto;
+.container{
+  .page{
+    &.upload{
+      .image-container{
+        img{
+          position: absolute;
+          left:50%;
+          top:50%;
+          transform: translate(-50%, -50%);
+        }
+        #user-image{
+          width:auto;
+        }
+      }
     }
   }
 }

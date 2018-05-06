@@ -12,6 +12,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "fs-extra": "^5.0.0",
+    "blueimp-load-image": "^2.19.0",
     "prop-types": "^15.6.1",
     "react": "^16.3.2",
     "react-dom": "^16.3.2",

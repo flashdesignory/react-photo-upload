@@ -2,6 +2,7 @@
 @import 'fonts';
 
 input, textarea, select { font-family:inherit; }
+form{width:100%;}
 
 .separator{
   width:100%;
@@ -27,20 +28,32 @@ input, textarea, select { font-family:inherit; }
   cursor: pointer;
   display:flex;
   justify-content: center;
+  margin-bottom: 20px;
   &:hover, &:focus {
     background:$main-dark;
   }
   &.wide{
     width:100%;
-    margin: 20px 0;
+  }
+  &.half{
+    width:47%;
+  }
+  &.third{
+    width:30%;
   }
   &.input-label{
     text-align: center;
+  }
+  &.disabled{
+    cursor: default;
+    pointer-events: none;
+    opacity: 0.5;
   }
   .button-icon{
     padding:5px;
     width:40px;
     margin-left:5px;
+    pointer-events: none;
   }
   .button-text{
     width:100%;
@@ -76,7 +89,16 @@ input, textarea, select { font-family:inherit; }
   }
 }
 
-.page{
-  margin-top:40px;
-  position: relative;
+.action-buttons{
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+}
+.navigation-buttons{
+  display:flex;
+  justify-content: space-between;
+  flex-direction: column;
+  &.row{
+    flex-direction: row;
+  }
 }

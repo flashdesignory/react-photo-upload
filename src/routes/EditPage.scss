@@ -1,3 +1,39 @@
-h1{
-  color:#330000;
+.container{
+  .page{
+    &.edit{
+      .image-container{
+        canvas{
+          position: absolute;
+          left:50%;
+          top:50%;
+          transform: translate(-50%, -50%);
+          pointer-events: none;
+          &.canvas-hidden{
+            display:none;
+            width:auto;
+          }
+          &.canvas-visible{
+            display: block;
+            width:auto;
+          }
+        }
+      }
+    }
+  }
+}
+
+#image-outline{
+  position: absolute;
+  height: 70%;
+  width:auto;
+  left:50%;
+  top:50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  &.image-hidden{
+    opacity: 0;
+  }
+  &.image-visible{
+    opacity: 1;
+  }
 }

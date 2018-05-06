@@ -13,18 +13,19 @@ class App extends Component {
   constructor(props){
     super(props);
     this.state = {
-      imageData:null
+      image: null,
+      result: null
     }
     this.setImageData = this.setImageData.bind(this);
     this.getImageData = this.getImageData.bind(this);
   }
-  setImageData(imageData){
+  setImageData(type, data){
     this.setState({
-      imageData
+      [type] : data
     })
   }
-  getImageData(){
-    return this.state.imageData;
+  getImageData(type){
+    return this.state[type];
   }
   render(){
     const { location, history } = this.props;
@@ -35,8 +36,8 @@ class App extends Component {
 					<Route exact path="/" render={() => <SplashPage history={history}/>}/>
 					<Route path="/upload" render={() => <UploadPage setImageData={this.setImageData} history={history}/>}/>
           <Route path="/webcam" render={() => <WebcamPage setImageData={this.setImageData} history={history}/>}/>
-          <Route path="/edit" render={() => <EditPage imageData={this.state.imageData} history={history}/>}/>
-          <Route path="/result" render={() => <ResultPage imageData={this.state.imageData} history={history}/>}/>
+          <Route path="/edit" render={() => <EditPage setImageData={this.setImageData} imageData={this.state['image']} history={history}/>}/>
+          <Route path="/result" render={() => <ResultPage imageData={this.state['result']} history={history}/>}/>
           <Route component={NotFound}/>
         </Switch>
       </div>

@@ -51,7 +51,7 @@ class WebcamPage extends Component{
     let image = new Image();
     image.src = data;
 
-    this.props.setImageData(image);
+    this.props.setImageData('image', image);
     this.setState({imageData : image})
   }
   handleOnPlay(e){

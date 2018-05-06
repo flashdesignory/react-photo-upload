@@ -90,6 +90,7 @@ class EditPage extends Component{
         this.props.history.goBack();
         break;
       case "next-button":
+        this.captureResult();
         this.props.history.push('/result');
         break;
       case "rotate-left-button":
@@ -111,6 +112,12 @@ class EditPage extends Component{
         this.drawUserCanvas();
         break;
     }
+  }
+  captureResult(){
+    let data = this.refs.inputCanvas.toDataURL();
+    let image = new Image();
+    image.src = data;
+    this.props.setImageData('result', image);
   }
   drawUserCanvas(){
     var inputCanvas = this.refs.inputCanvas;
@@ -194,7 +201,7 @@ class EditPage extends Component{
               <span className="icon-arrow-left button-icon"></span>
               <span className="button-text">prev</span>
             </button>
-            <button className={ this.state.completed ? "button half next" : "button half next disabled" }
+            <button className="button half next"
               id="next-button"
               onClick={this.handleOnClick}>
               <span className="button-text">next</span>

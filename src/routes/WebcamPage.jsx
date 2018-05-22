@@ -21,12 +21,16 @@ class WebcamPage extends Component{
       this.webcamSupported = false;
     }
   }
+  componentWillUnmount(){
+    if(WebcamPage.track) WebcamPage.track.stop();
+  }
   displayVideo(){
     let video = this.refs.videoElement;
     navigator.mediaDevices.getUserMedia({ video: true })
     .then(function(stream) {
       video.srcObject = stream;
       video.play();
+      WebcamPage.track = stream.getTracks()[0];
     })
     .catch(err => {
       console.log("error: " + err)
@@ -118,8 +122,8 @@ class WebcamPage extends Component{
             <button className={ this.state.imageData ? "button wide next" : "button wide next disabled"}
               id="next-button"
               onClick={this.handleOnClick}>
-              <span className="icon-arrow-right button-icon"></span>
               <span className="button-text">next</span>
+              <span className="icon-arrow-right button-icon"></span>
             </button>
           </div>
         </div>

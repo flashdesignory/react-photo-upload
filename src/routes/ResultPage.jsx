@@ -37,8 +37,8 @@ class ResultPage extends Component{
             <button className={ this.props.imageData ? "button wide next" : "button wide next disabled" }
               id="next-button"
               onClick={this.handleOnClick}>
-              <span className="icon-arrow-right button-icon"></span>
               <span className="button-text">restart</span>
+              <span className="icon-arrow-right button-icon"></span>
             </button>
           </div>
         </div>

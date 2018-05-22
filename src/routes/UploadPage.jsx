@@ -217,8 +217,8 @@ class UploadPage extends Component{
             <button className={ this.state.imageData ? "button wide next" : "button wide next disabled" }
               id="next-button"
               onClick={this.handleOnClick}>
-              <span className="icon-arrow-right button-icon"></span>
               <span className="button-text">next</span>
+              <span className="icon-arrow-right button-icon"></span>
             </button>
           </div>
         </div>

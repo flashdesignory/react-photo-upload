@@ -14,15 +14,27 @@ class App extends Component {
     super(props);
     this.state = {
       image: null,
-      result: null
+      edit:null,
+      result: null,
     }
     this.setImageData = this.setImageData.bind(this);
     this.getImageData = this.getImageData.bind(this);
   }
-  setImageData(type, data){
-    this.setState({
-      [type] : data
-    })
+  setImageData(type, data, cb){
+    console.log("type: " + type);
+    if(type == ""){
+      this.setState({
+        image: null, edit:null, result: null
+      }, () => {
+        if(cb) cb();
+      })
+    }else{
+      this.setState({
+        [type] : data
+      }, () => {
+        if(cb) cb();
+      })
+    }
   }
   getImageData(type){
     return this.state[type];
@@ -33,11 +45,23 @@ class App extends Component {
       <div className="container">
         <Header/>
         <Switch location={location}>
-					<Route exact path="/" render={() => <SplashPage history={history}/>}/>
-					<Route path="/upload" render={() => <UploadPage setImageData={this.setImageData} history={history}/>}/>
-          <Route path="/webcam" render={() => <WebcamPage setImageData={this.setImageData} history={history}/>}/>
-          <Route path="/edit" render={() => <EditPage setImageData={this.setImageData} imageData={this.state['image']} history={history}/>}/>
-          <Route path="/result" render={() => <ResultPage imageData={this.state['result']} history={history}/>}/>
+					<Route exact path="/" render={() => <SplashPage
+              history={history}/>}/>
+					<Route path="/upload" render={() => <UploadPage
+              setImageData={this.setImageData}
+              history={history}/>}/>
+          <Route path="/webcam" render={() => <WebcamPage
+              setImageData={this.setImageData}
+              history={history}/>}/>
+          <Route path="/edit" render={() => <EditPage
+              setImageData={this.setImageData}
+              imageData={this.state['image']}
+              editData={this.state['edit']}
+              history={history}/>}/>
+          <Route path="/result" render={() => <ResultPage
+              setImageData={this.setImageData}
+              imageData={this.state['edit']}
+              history={history}/>}/>
           <Route component={NotFound}/>
         </Switch>
       </div>

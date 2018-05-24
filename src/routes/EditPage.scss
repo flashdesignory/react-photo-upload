@@ -2,6 +2,12 @@
   .page{
     &.edit{
       .image-container{
+        .image-content{
+          &.pen{
+            cursor: pointer;
+            cursor: url(files/images/mouse_red.png) 10 10, pointer;
+          }
+        }
         canvas{
           position: absolute;
           left:50%;
@@ -15,6 +21,9 @@
           &.canvas-visible{
             display: block;
             width:auto;
+          }
+          &.opacity-50{
+            opacity: 0.5;
           }
         }
       }

@@ -10,9 +10,13 @@ class WebcamPage extends Component{
       isAvailable:false,
       error: ""
     }
+
     this.handleOnClick = this.handleOnClick.bind(this);
     this.handleOnPlay = this.handleOnPlay.bind(this);
     this.handleOnPause = this.handleOnPause.bind(this);
+  }
+  componentWillUnmount(){
+    if(WebcamPage.track) WebcamPage.track.stop();
   }
   checkSupport(){
     if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
@@ -20,9 +24,6 @@ class WebcamPage extends Component{
     }else{
       this.webcamSupported = false;
     }
-  }
-  componentWillUnmount(){
-    if(WebcamPage.track) WebcamPage.track.stop();
   }
   displayVideo(){
     let video = this.refs.videoElement;
@@ -55,8 +56,14 @@ class WebcamPage extends Component{
     let image = new Image();
     image.src = data;
 
-    this.props.setImageData('image', image);
-    this.setState({imageData : image})
+    this.props.setImageData('image', {image}, () => {
+      console.log("image assigned to app");
+    });
+
+    this.setState({imageData : image}, () => {
+      console.log("done with image");
+      setTimeout(() => this.props.history.push('/edit'), 50);
+    })
   }
   handleOnPlay(e){
     console.log("handleOnPlay()");
@@ -72,6 +79,9 @@ class WebcamPage extends Component{
   }
   handleOnClick(e){
     console.log('handleOnClick()');
+    this.setState({
+      error: ""
+    })
     switch(e.target.id){
       case "snap-button":
         this.takePicture();
@@ -138,8 +148,8 @@ class WebcamPage extends Component{
                   onPlaying={this.handleOnPlay}
                   onPause={this.handleOnPause}></video>
               }
+              <div className={this.state.error !== "" ? "error-container error-visible" : "error-container error-hidden"}><div className="error-message">{ this.state.error }</div></div>
             </div>
-            <div className="error">{ this.state.error }</div>
           </div>
         </div>
       )

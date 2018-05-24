@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import './SplashPage.scss';
-import { isMobile } from '../utils/utils';
 
 class SplashPage extends Component{
   constructor(props){
@@ -16,9 +15,6 @@ class SplashPage extends Component{
       case "upload-button":
         this.props.history.push('/upload');
         break;
-      case "webcam-button":
-        this.props.history.push('/webcam');
-        break;
     }
   }
 
@@ -30,16 +26,8 @@ class SplashPage extends Component{
             <button className="button wide upload"
               id="upload-button"
               onClick={this.handleOnClick}>
-              <span className="icon-folder-upload button-icon"></span>
-              <span className="button-text">upload image</span>
+              <span className="button-text">Start</span>
             </button>
-            {!isMobile() ? (
-              <button className="button wide webcam"
-                id="webcam-button"
-                onClick={this.handleOnClick}>
-                <span className="icon-camera button-icon"></span>
-                <span className="button-text">use webcam</span></button>
-            ):null}
           </div>
         </div>
       </div>

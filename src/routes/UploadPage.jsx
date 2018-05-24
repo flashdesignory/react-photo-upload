@@ -1,7 +1,10 @@
 import React, { Component } from 'react';
 import loadImage from 'blueimp-load-image';
-import { formatBytes } from '../utils/utils';
+import Preloader from '../modules/preloader/Preloader';
+import { formatBytes, isMobile } from '../utils/utils';
 import './UploadPage.scss';
+
+const IMAGE_SCALE = 1.1;
 
 class UploadPage extends Component{
   constructor(props){
@@ -10,24 +13,18 @@ class UploadPage extends Component{
       imageData:null,
       imageId:"",
       imageWidth:0,
-      imageHeight:0
+      imageHeight:0,
+      processing:false,
+      error: ""
     }
     this.maxFilesize = 4000000;
     this.checkSupport();
     this.reader = null;
     this.handleOnChange = this.handleOnChange.bind(this);
-  //  this.handleOnLoaded = this.handleOnLoaded.bind(this);
-    //this.handleOnAbort = this.handleOnAbort.bind(this);
-  //  this.handleOnError = this.handleOnError.bind(this);
-  //  this.handleOnProgress = this.handleOnProgress.bind(this);
-    //this.handleOnStart = this.handleOnStart.bind(this);
-
     this.handleDragEnter = this.handleDragEnter.bind(this);
     this.handleDragLeave = this.handleDragLeave.bind(this);
     this.handleDragOver = this.handleDragOver.bind(this);
     this.handleDrop = this.handleDrop.bind(this);
-
-    //this.handleImageLoaded  = this.handleImageLoaded.bind(this);
     this.handleOnClick = this.handleOnClick.bind(this);
   }
   checkSupport(){
@@ -47,39 +44,37 @@ class UploadPage extends Component{
       }
     }
 
+    this.showError("");
+
     if(selectedFiles.length > 0){
-      this.setState({imageId:selectedFiles[0].name}, () => this.readImage(selectedFiles[0]))
+      this.setState({imageId:selectedFiles[0].name, processing:true}, () => this.readImage(selectedFiles[0]))
     }
   }
   readImage(file){
     console.log("readImage()");
-    /*this.reader = new FileReader()
-    this.reader.addEventListener("loadend", this.handleOnLoaded);
-    this.reader.addEventListener("error", this.handleOnError);
-    this.reader.addEventListener("abort", this.handleOnAbort);
-    this.reader.addEventListener("loadstart", this.handleOnStart);
-    this.reader.addEventListener("progress", this.handleOnProgress);
-    this.reader.readAsDataURL(file)*/
     loadImage(file, (img) => {
       let data = img.toDataURL();
       let image = new Image();
       image.src = data;
 
-      this.props.setImageData('image', image);
+      this.props.setImageData('image', {image}, () => {
+        console.log("image assigned to app");
+      });
 
       this.setState({
         imageData : image,
         imageWidth:img.width,
-        imageHeight:img.height
+        imageHeight:img.height,
+        processing: false
       }, () => {
         console.log("done with image");
+        setTimeout(() => this.props.history.push('/edit'), 50);
       });
     }, {
-      maxWidth: 520,
-      maxHeight: 390,
+      maxWidth: this.refs.imageContainer.offsetWidth * IMAGE_SCALE,
+      maxHeight: this.refs.imageContainer.offsetHeight * IMAGE_SCALE,
       cover:true,
       canvas: true,
-      //pixelRatio: window.devicePixelRatio,
       downsamplingRatio: 0.5,
       orientation: true
     })
@@ -88,84 +83,20 @@ class UploadPage extends Component{
     let message = "";
     switch(type){
       case "size":
-        message = "image is too big";
-        break;
-    }
-    console.log(message);
-  }
-  /*handleOnLoaded(e){
-    let data = e.target.result;
-    let image = new Image();
-    image.id = this.state.imageId;
-    image.addEventListener('load', this.handleImageLoaded);
-    image.src = data;
-  }
-  handleImageLoaded(e){
-    if(e.target.id === this.state.imageId){
-      console.log(e.target.width, e.target.height);
-      const MAX_WIDTH = 520; //520*1.4
-      const MAX_HEIGHT = 390; //390*1.4
-      let width = e.target.width;
-      let height = e.target.height;
-
-      if (width > height) {
-         if (width > MAX_WIDTH) {
-             height *= MAX_WIDTH / width;
-             width = MAX_WIDTH;
-         }
-      } else {
-         if (height > MAX_HEIGHT) {
-             width *= MAX_HEIGHT / height;
-             height = MAX_HEIGHT;
-         }
-      }
-      e.target.width = width;
-      e.target.height = height;
-
-      console.log(e.target.width, e.target.height);
-
-      this.props.setImageData(e.target);
-
-      this.setState({
-        imageData : e.target,
-        imageWidth:e.target.width,
-        imageHeight:e.target.height
-      }, () => {
-        //this.refs.userImage.style.width = this.state.imageWidth + "px";
-        //this.refs.userImage.style.height = this.state.imageHeight + "px";
-      });
-    }
-  }
-  handleOnAbort(e){
-    console.log("handleOnAbort()");
-  }
-  handleOnError(e){
-    switch(e.target.error.code) {
-      case e.target.error.NOT_FOUND_ERR:
-        console.log('File Not Found!');
-        break;
-      case e.target.error.NOT_READABLE_ERR:
-        console.log('File is not readable');
-        break;
-      case e.target.error.ABORT_ERR:
+        message = "Image should be less than 4MB";
         break;
       default:
-        console.log('An error occurred reading this file.');
-    };
-  }
-  handleOnProgress(e){
-    if (e.lengthComputable) {
-      let percentLoaded = Math.round((e.loaded / e.total) * 100);
-      if (percentLoaded < 100) {
-        console.log(percentLoaded + '%');
-      }
+        message = ""
     }
+    this.setState({
+      error: message
+    })
   }
-  handleOnStart(e){
-    console.log("handleOnStart()");
-  }*/
   handleDragEnter(e){
     console.log("handleDragEnter()");
+    this.setState({
+      error: ""
+    })
     e.stopPropagation();
 		e.preventDefault();
   }
@@ -198,6 +129,9 @@ class UploadPage extends Component{
       case "next-button":
         this.props.history.push('/edit');
         break;
+      case "webcam-button":
+        this.props.history.push('/webcam');
+        break;
     }
   }
   render(){
@@ -206,12 +140,20 @@ class UploadPage extends Component{
         <div className="buttons-container">
           <div className="action-buttons">
             <form className="upload-form">
-              <input className="input input-file" type="file" id="fileElem" accept="image/*" onChange={this.handleOnChange}/>
+              <input className="input input-file" ref="inputElement" type="file" id="fileElem" accept="image/*" onChange={this.handleOnChange}/>
               <label className="button wide input-label" htmlFor="fileElem">
                 <span className="icon-folder-upload button-icon"></span>
                 <span className="button-text">Choose a file</span>
               </label>
             </form>
+            {!isMobile() ? (
+              <button className="button webcam"
+                id="webcam-button"
+                onClick={this.handleOnClick}
+                style={{marginLeft: "20px"}}>
+                <span className="icon-camera button-icon"></span>
+              </button>
+            ):null}
           </div>
           <div className="navigation-buttons">
             <button className={ this.state.imageData ? "button wide next" : "button wide next disabled" }
@@ -226,9 +168,12 @@ class UploadPage extends Component{
           onDragEnter={this.handleDragEnter}
           onDragLeave={this.handleDragLeave}
           onDragOver={this.handleDragOver}
-          onDrop={this.handleDrop}>
+          onDrop={this.handleDrop}
+          ref="imageContainer">
           <div className="image-content">
             {this.state.imageData ? <img src={ this.state.imageData.src } id="user-image" ref="userImage"/> : null}
+            {this.state.processing && <Preloader />}
+            <div className={this.state.error !== "" ? "error-container error-visible" : "error-container error-hidden"}><div className="error-message">{ this.state.error }</div></div>
           </div>
         </div>
       </div>

@@ -1,0 +1,40 @@
+.container{
+  .page{
+    &.result{
+      .image-container{
+        .image-content{
+          canvas{
+            position: absolute;
+            left:50%;
+            top:50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            width:auto;
+          }
+        }
+        .image-invisible{
+          display:none;
+        }
+        .effect-buttons{
+          display: flex;
+          position: absolute;
+          right:0px;
+          bottom:0px;
+          &.column{
+            flex-direction: column;
+          }
+          &.row{
+            flex-direction: row;
+          }
+          .button{
+            padding: 5px 10px;
+            margin: 2.5px 5px;
+            .button-text{
+              padding-right:0;
+            }
+          }
+        }
+      }
+    }
+  }
+}

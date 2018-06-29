@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import loadImage from 'blueimp-load-image';
 import Preloader from '../modules/preloader/Preloader';
-import { formatBytes, isMobile } from '../utils/utils';
+import { formatBytes } from '../utils/utils';
+import { isMobile } from '../utils/mobile';
 import './UploadPage.scss';
 
 const IMAGE_SCALE = 1.1;

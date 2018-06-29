@@ -1,5 +1,3 @@
-import {isMobile } from './utils';
-
 var resizeTime;
 var resizeDelta = 200;
 var changeDelta = 750;
@@ -36,7 +34,6 @@ function handleOnResizeComplete(){
 			handleOnResizeComplete();
 		}, resizeDelta);
 	} else {
-      console.log("done resizing");
 			resizeTimeout = false;
 			isResizing = false;
 	}
@@ -49,10 +46,8 @@ function handleOnOrientationChange(e){
 }
 
 export default function(){
-  console.log("initResize()");
   resizeTime = new Date();
   body = document.getElementsByTagName('body')[0];
-  isMobile() ? body.classList.add("mobile") : body.classList.add("desktop");
   window.addEventListener("resize", handleOnResize);
   window.addEventListener("orientationchange", handleOnOrientationChange);
   handleOnResize();

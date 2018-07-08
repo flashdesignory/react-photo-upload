@@ -1,38 +1,56 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import './SplashPage.scss';
 
-class SplashPage extends Component{
-  constructor(props){
+class SplashPage extends Component {
+  constructor(props) {
     super(props);
     this.handleOnClick = this.handleOnClick.bind(this);
   }
 
-  handleOnClick(e){
+  handleOnClick(e) {
     e.preventDefault();
-    let id=e.target.id;
-    console.log("handleOnClick(" + id + ", " + this.props.location + ")")
-    switch(id){
-      case "upload-button":
-        this.props.history.push('/upload');
+    const { id } = e.target;
+    const { history, location } = this.props;
+    console.log(`handleOnClick(${id}, ${location})`);
+    switch (id) {
+      case 'upload-button':
+        history.push('/upload');
         break;
+      default:
     }
   }
 
-  render(){
+  render() {
     return (
       <div className="page splash">
         <div className="buttons-container">
           <div className="navigation-buttons">
-            <button className="button wide upload"
+            <button
+              className="button wide upload"
+              type="button"
               id="upload-button"
-              onClick={this.handleOnClick}>
-              <span className="button-text">Start</span>
+              onClick={this.handleOnClick}
+            >
+              <span className="button-text">
+                Start
+              </span>
             </button>
           </div>
         </div>
       </div>
-    )
+    );
   }
 }
+
+SplashPage.defaultProps = {
+  history: {},
+  location: {},
+};
+
+SplashPage.propTypes = {
+  history: PropTypes.object,
+  location: PropTypes.object,
+};
 
 export default SplashPage;

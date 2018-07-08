@@ -1,20 +1,25 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import './EditPage.scss';
 
 const ROTATION_STEP = 5;
 const SCALE_STEP = 0.05;
 const MIN_SCALE = 0.2;
 const MAX_SCALE = 1.5;
-const TO_RADIANS = Math.PI/180;
+const TO_RADIANS = Math.PI / 180;
 
-class EditPage extends Component{
-  constructor(props){
+class EditPage extends Component {
+  constructor(props) {
     super(props);
 
     this.state = {
       isMoving: false,
-      selectedTool: ""
-    }
+      selectedTool: '',
+    };
+
+    this.canvasContainer = React.createRef();
+    this.imageContainer = React.createRef();
+    this.editCanvas = React.createRef();
 
     this.resizeTime = new Date();
     this.resizeDelta = 200;
@@ -32,7 +37,42 @@ class EditPage extends Component{
     this.handleOnResizeComplete = this.handleOnResizeComplete.bind(this);
     this.handleOnOrientationChange = this.handleOnOrientationChange.bind(this);
   }
-  reset(){
+
+  componentDidMount() {
+    const { editData } = this.props;
+    if (editData) {
+      const { settings } = editData;
+      this.settings = Object.assign({}, settings);
+      this.startX = 0;
+      this.startY = 0;
+      this.localX = 0;
+      this.localY = 0;
+      this.prevX = 0;
+      this.prevY = 0;
+    } else {
+      this.reset();
+    }
+
+    this.setCanvasReferences();
+    this.drawUserCanvas();
+    this.captureResult();
+    this.imageContainer.current.addEventListener('touchmove', this.handleOnTouchMove, { passive: false });
+    window.addEventListener('resize', this.handleOnResize);
+    window.addEventListener('orientationchange', this.handleOnOrientationChange);
+  }
+
+  componentWillUnmount() {
+    this.imageContainer.current.removeEventListener('touchmove', this.handleOnTouchMove);
+    window.removeEventListener('resize', this.handleOnResize);
+    window.removeEventListener('orientationchange', this.handleOnOrientationChange);
+  }
+
+  setCanvasReferences() {
+    this.containerRect = this.imageContainer.current.getBoundingClientRect();
+    this.canvasRect = this.canvasContainer.current.getBoundingClientRect();
+  }
+
+  reset() {
     this.settings.rotation = 0;
     this.settings.scale = 1;
     this.settings.offsetX = 0;
@@ -40,106 +80,91 @@ class EditPage extends Component{
     this.settings.currentX = 0;
     this.settings.currentY = 0;
 
-    this.startX = this.startY = 0;
-    this.localX = this.localY = 0;
-    this.prevX = this.prevY = 0;
+    this.startX = 0;
+    this.startY = 0;
+    this.localX = 0;
+    this.localY = 0;
+    this.prevX = 0;
+    this.prevY = 0;
   }
-  setCanvasReferences(){
-    this.containerRect = this.refs.imageContainer.getBoundingClientRect();
-    this.canvasRect = this.refs.canvasContainer.getBoundingClientRect();
-  }
-  updateRectangles(){
-    this.scrollYOffset = window.pageYOffset || (document.documentElement.scrollTop - document.documentElement.clientTop) || 0;
-  }
-  componentDidMount(){
-    if(this.props.editData){
-      this.settings = Object.assign({}, this.props.editData.settings);
-      this.startX = this.startY = 0;
-      this.localX = this.localY = 0;
-      this.prevX = this.prevY = 0;
-    }else{
-      this.reset();
-    }
 
-    this.setCanvasReferences();
-    this.drawUserCanvas();
-    this.captureResult();
-    this.refs.imageContainer.addEventListener('touchmove', this.handleOnTouchMove, { passive: false });
-    window.addEventListener("resize", this.handleOnResize);
-    window.addEventListener("orientationchange", this.handleOnOrientationChange);
+  updateRectangles() {
+    this.scrollYOffset = window.pageYOffset
+    || (document.documentElement.scrollTop - document.documentElement.clientTop)
+    || 0;
   }
-  componentWillUnmount(){
-    this.refs.imageContainer.removeEventListener('touchmove', this.handleOnTouchMove);
-    window.removeEventListener("resize", this.handleOnResize);
-    window.removeEventListener("orientationchange", this.handleOnOrientationChange);
-  }
-  handleOnTouchMove(e){
+
+  handleOnTouchMove(e) {
+    this.funcName = 'handleOnTouchMove'; // hack... doesn't feel right...
     e.preventDefault();
   }
-  handleOnOrientationChange(e){
-    console.log("handleOnOrientationChange()");
-    setTimeout(()=> {
+
+  handleOnOrientationChange() {
+    setTimeout(() => {
       this.handleOnResize();
     }, 750);
   }
-  handleOnResize(e){
+
+  handleOnResize() {
     this.isResizing = true;
     this.resizeTime = new Date();
-    if(this.resizeTimeout === false){
+    if (this.resizeTimeout === false) {
       this.resizeTimeout = true;
       setTimeout(() => {
         this.handleOnResizeComplete();
       }, this.resizeDelta);
     }
-
   }
-  handleOnResizeComplete(){
+
+  handleOnResizeComplete() {
     if (new Date() - this.resizeTime < this.resizeDelta) {
       setTimeout(() => {
         this.handleOnResizeComplete();
       }, this.resizeDelta);
     } else {
-        this.resizeTimeout = false;
-        this.isResizing = false;
-        this.updateRectangles();
+      this.resizeTimeout = false;
+      this.isResizing = false;
+      this.updateRectangles();
     }
   }
-  handleOnMouseDown(e){
+
+  handleOnMouseDown(e) {
     this.updateRectangles();
 
     e.persist();
-    if(e.touches){
+    if (e.touches) {
       this.startX = e.touches[0].pageX;
       this.startY = e.touches[0].pageY - this.scrollYOffset;
-    }else{
+    } else {
       this.startX = e.pageX;
       this.startY = e.pageY - this.scrollYOffset;
     }
 
     this.setState({ isMoving: true }, () => {
       this.handleOnMouseMove(e);
-      e = null;
+      // e = null;
     });
   }
-  handleOnMouseMove(e){
-    if(!this.state.isMoving){
+
+  handleOnMouseMove(e) {
+    const { isMoving } = this.state;
+    if (!isMoving) {
       e.preventDefault();
       return;
     }
 
-    if(e.touches){
+    if (e.touches) {
       this.settings.offsetX = e.touches[0].pageX - this.startX;
       this.settings.offsetY = e.touches[0].pageY - this.startY - this.scrollYOffset;
-    }else{
+    } else {
       this.settings.offsetX = e.pageX - this.startX;
       this.settings.offsetY = e.pageY - this.startY - this.scrollYOffset;
     }
 
     this.handleMouseEvent();
   }
-  handleOnMouseUp(e){
-    console.log("handleOnMouseUp()");
 
+  handleOnMouseUp(e) {
     this.settings.currentX += this.settings.offsetX;
     this.settings.currentY += this.settings.offsetY;
     this.settings.offsetX = 0;
@@ -147,69 +172,76 @@ class EditPage extends Component{
 
     this.captureResult();
 
-    this.setState({isMoving: false});
-    if(e.touches){e.preventDefault();}
+    this.setState({ isMoving: false });
+    if (e.touches) { e.preventDefault(); }
   }
-  evaluateMouseEvent(e){
-    let point = {};
-    if(e.touches){
+
+  evaluateMouseEvent(e) {
+    const point = {};
+    if (e.touches) {
       point.x = (e.touches[0].pageX - this.maskRect.left);
       point.y = (e.touches[0].pageY - this.maskRect.top - this.scrollYOffset);
-    }else{
+    } else {
       point.x = (e.pageX - this.maskRect.left);
       point.y = (e.pageY - this.maskRect.top - this.scrollYOffset);
     }
     return point;
   }
-  handleMouseEvent(){
+
+  handleMouseEvent() {
     this.drawUserCanvas();
   }
-  handleOnClick(e){
-    console.log('handleOnClick(' + e.target.id + ')');
-    switch(e.target.id){
-      case "prev-button":
-        this.props.setImageData('edit', null);
-        this.props.history.goBack();
+
+  handleOnClick(e) {
+    // console.log(`handleOnClick(${e.target.id})`);
+    const { history, setImageData } = this.props;
+    switch (e.target.id) {
+      case 'prev-button':
+        setImageData('edit', null);
+        history.goBack();
         break;
-      case "next-button":
-        this.props.history.push('/result')
+      case 'next-button':
+        history.push('/result');
         break;
-      case "rotate-left-button":
+      case 'rotate-left-button':
         this.settings.rotation -= ROTATION_STEP;
         this.drawUserCanvas();
         this.captureResult();
         break;
-      case "rotate-right-button":
+      case 'rotate-right-button':
         this.settings.rotation += ROTATION_STEP;
         this.drawUserCanvas();
         this.captureResult();
         break;
-      case "zoom-in-button":
+      case 'zoom-in-button':
         this.settings.scale += SCALE_STEP;
-        if(this.settings.scale > MAX_SCALE) this.settings.scale = MAX_SCALE;
+        if (this.settings.scale > MAX_SCALE) this.settings.scale = MAX_SCALE;
         this.drawUserCanvas();
         this.captureResult();
         break;
-      case "zoom-out-button":
+      case 'zoom-out-button':
         this.settings.scale -= SCALE_STEP;
-        if(this.settings.scale < MIN_SCALE) this.settings.scale = MIN_SCALE;
+        if (this.settings.scale < MIN_SCALE) this.settings.scale = MIN_SCALE;
         this.drawUserCanvas();
         this.captureResult();
         break;
+      default:
     }
   }
-  drawUserCanvas(){
-    console.log("drawUserCanvas()");
-    let inputCanvas = this.refs.editCanvas;
-    let inputContext = inputCanvas.getContext("2d");
-    let imageData = this.props.imageData.image;
+
+  drawUserCanvas() {
+    // console.log('drawUserCanvas()');
+    const { imageData: { image } } = this.props;
+    const inputCanvas = this.editCanvas.current;
+    const inputContext = inputCanvas.getContext('2d');
+    const imageData = image;
 
     inputContext.canvas.width = imageData.width;
     inputContext.canvas.height = imageData.height;
 
     inputContext.translate(
-      (imageData.width/2)+this.settings.currentX + this.settings.offsetX,
-      (imageData.height/2)+this.settings.currentY+this.settings.offsetY
+      (imageData.width / 2) + this.settings.currentX + this.settings.offsetX,
+      (imageData.height / 2) + this.settings.currentY + this.settings.offsetY,
     );
 
     inputContext.scale(this.settings.scale, this.settings.scale);
@@ -217,84 +249,135 @@ class EditPage extends Component{
 
     inputContext.drawImage(
       imageData,
-      -(imageData.width/2),
-      -(imageData.height/2),
+      -(imageData.width / 2),
+      -(imageData.height / 2),
       imageData.width,
-      imageData.height
+      imageData.height,
     );
-    //this.captureResult();
+    // this.captureResult();
   }
-  captureResult(){
-    console.log("captureResult()")
-    let data, image, settings;
-    data = this.refs.editCanvas.toDataURL();
-    image = new Image();
+
+  captureResult() {
+    //  console.log('captureResult()');
+    const { setImageData } = this.props;
+    const data = this.editCanvas.current.toDataURL();
+    const settings = Object.assign({}, this.settings);
+    const image = new Image();
     image.src = data;
-    settings = Object.assign({}, this.settings);
-    this.props.setImageData('edit', {image, settings});
+    setImageData('edit', { image, settings });
   }
-  displayCanvas(){
+
+  displayCanvas() {
+    const { selectedTool } = this.state;
     return (
-      <div className={ `image-content ${this.state.selectedTool}` }
-        onMouseDown={ this.handleOnMouseDown }
-        onMouseMove={ this.handleOnMouseMove }
-        onMouseUp={ this.handleOnMouseUp }
-        onTouchStart={ this.handleOnMouseDown }
-        onTouchMove={ this.handleOnMouseMove }
-        onTouchEnd={ this.handleOnMouseUp }
-        ref="canvasContainer">
-        <canvas id="input-canvas" ref="editCanvas"
-          className="canvas-visible"></canvas>
+      <div
+        className={`image-content ${selectedTool}`}
+        onMouseDown={this.handleOnMouseDown}
+        onMouseMove={this.handleOnMouseMove}
+        onMouseUp={this.handleOnMouseUp}
+        onTouchStart={this.handleOnMouseDown}
+        onTouchMove={this.handleOnMouseMove}
+        onTouchEnd={this.handleOnMouseUp}
+        ref={this.canvasContainer}
+        role="button"
+        tabIndex={0}
+      >
+        <canvas
+          id="input-canvas"
+          ref={this.editCanvas}
+          className="canvas-visible"
+        />
       </div>
-    )
+    );
   }
-  render(){
+
+  render() {
     return (
       <div className="page edit">
         <div className="buttons-container">
           <div className="action-buttons">
-            <button className="button zoom-in"
+            <button
+              className="button zoom-in"
+              type="button"
               id="zoom-in-button"
-              onClick={this.handleOnClick}>
-              <span className="icon-zoom-in button-icon"></span>
+              onClick={this.handleOnClick}
+            >
+              <span className="icon-zoom-in button-icon" />
             </button>
-            <button className="button zoom-out"
+            <button
+              className="button zoom-out"
+              type="button"
               id="zoom-out-button"
-              onClick={this.handleOnClick}>
-              <span className="icon-zoom-out button-icon"></span>
+              onClick={this.handleOnClick}
+            >
+              <span className="icon-zoom-out button-icon" />
             </button>
-            <button className="button rotate-left"
+            <button
+              className="button rotate-left"
+              type="button"
               id="rotate-left-button"
-              onClick={this.handleOnClick}>
-              <span className="icon-rotate-left button-icon"></span>
+              onClick={this.handleOnClick}
+            >
+              <span className="icon-rotate-left button-icon" />
             </button>
-            <button className="button rotate-right"
+            <button
+              className="button rotate-right"
+              type="button"
               id="rotate-right-button"
-              onClick={this.handleOnClick}>
-              <span className="icon-repeat button-icon"></span>
+              onClick={this.handleOnClick}
+            >
+              <span className="icon-repeat button-icon" />
             </button>
           </div>
           <div className="navigation-buttons row">
-            <button className="button half prev"
+            <button
+              className="button half prev"
+              type="button"
               id="prev-button"
-              onClick={this.handleOnClick}>
-              <span className="icon-arrow-left button-icon"></span>
-              <span className="button-text">prev</span>
+              onClick={this.handleOnClick}
+            >
+              <span className="icon-arrow-left button-icon" />
+              <span className="button-text">
+                prev
+              </span>
             </button>
-            <button className="button half next"
+            <button
+              className="button half next"
+              type="button"
               id="next-button"
-              onClick={this.handleOnClick}>
-              <span className="button-text">next</span>
-              <span className="icon-arrow-right button-icon"></span>
+              onClick={this.handleOnClick}
+            >
+              <span className="button-text">
+                next
+              </span>
+              <span className="icon-arrow-right button-icon" />
             </button>
           </div>
         </div>
-        <div className="image-container" ref="imageContainer">
+        <div className="image-container" ref={this.imageContainer}>
           {this.displayCanvas()}
         </div>
       </div>
-    )
+    );
   }
 }
+
+EditPage.defaultProps = {
+  editData: null,
+  imageData: null,
+  history: {},
+  setImageData: () => {},
+};
+
+EditPage.propTypes = {
+  editData: PropTypes.shape({
+    settings: PropTypes.object,
+  }),
+  imageData: PropTypes.shape({
+    image: PropTypes.object,
+  }),
+  history: PropTypes.object,
+  setImageData: PropTypes.func,
+};
 
 export default EditPage;

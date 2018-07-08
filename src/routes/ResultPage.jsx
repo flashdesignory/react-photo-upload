@@ -1,83 +1,119 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import './ResultPage.scss';
 
-class ResultPage extends Component{
-  constructor(props){
+class ResultPage extends Component {
+  constructor(props) {
     super(props);
-    this.state = {
-      currentFilter: ""
-    }
+
+    this.inputCanvas = React.createRef();
+
     this.handleOnClick = this.handleOnClick.bind(this);
   }
-  componentDidMount(){
+
+  componentDidMount() {
     this.drawUserCanvas();
   }
-  handleOnClick(e){
+
+  handleOnClick(e) {
     console.log('handleOnClick()');
-    switch(e.target.id){
-      case "prev-button":
-        this.props.setImageData('result', null);
-        this.props.history.goBack();
+    const { history, setImageData } = this.props;
+    switch (e.target.id) {
+      case 'prev-button':
+        setImageData('result', null);
+        history.goBack();
         break;
-      case "next-button":
-        this.props.setImageData('', null);
-        this.props.history.push('/upload');
+      case 'next-button':
+        setImageData('', null);
+        history.push('/upload');
         break;
-      case "save-button":
-        //e.target.href = this.props.imageData.image.src;
-        e.target.href = this.refs.inputCanvas.toDataURL('image/png');
-        e.target.download = "myphoto.png";
+      case 'save-button':
+        e.target.href = this.inputCanvas.current.toDataURL('image/png');
+        e.target.download = 'myphoto.png';
         break;
+      default:
     }
   }
-  drawUserCanvas(type = ""){
-    console.log("drawUserCanvas()");
-    let inputCanvas = this.refs.inputCanvas;
-    let inputContext = inputCanvas.getContext("2d");
-    let imageData = this.props.imageData.image;
-    let inputWidth = imageData.width;
-    let inputHeight = imageData.height;
+
+  drawUserCanvas() {
+    console.log('drawUserCanvas()');
+    const { imageData: { image } } = this.props;
+    const inputContext = this.inputCanvas.current.getContext('2d');
+    const imageData = image;
+    const inputWidth = imageData.width;
+    const inputHeight = imageData.height;
     inputContext.canvas.width = inputWidth;
     inputContext.canvas.height = inputHeight;
-    inputContext.clearRect(0, 0, inputWidth, inputHeight)
+    inputContext.clearRect(0, 0, inputWidth, inputHeight);
     inputContext.drawImage(imageData, 0, 0);
   }
-  render(){
+
+  render() {
+    const { imageData: { image }, imageData } = this.props;
     return (
       <div className="page result">
         <div className="buttons-container">
           <div className="action-buttons">
-            <a className={ this.props.imageData ? "button wide save" : "button wide save disabled" }
+            <button
+              className={imageData ? 'button wide save' : 'button wide save disabled'}
+              type="button"
               id="save-button"
-              onClick={this.handleOnClick}>
-              <span className="icon-folder-download button-icon"></span>
-              <span className="button-text">save</span>
-            </a>
+              onClick={this.handleOnClick}
+            >
+              <span className="icon-folder-download button-icon" />
+              <span className="button-text">
+                save
+              </span>
+            </button>
           </div>
           <div className="navigation-buttons row">
-            <button className="button half prev"
+            <button
+              className="button half prev"
+              type="button"
               id="prev-button"
-              onClick={this.handleOnClick}>
-              <span className="icon-arrow-left button-icon"></span>
-              <span className="button-text">prev</span>
+              onClick={this.handleOnClick}
+            >
+              <span className="icon-arrow-left button-icon" />
+              <span className="button-text">
+                prev
+              </span>
             </button>
-            <button className="button half next"
+            <button
+              className="button half next"
+              type="button"
               id="next-button"
-              onClick={this.handleOnClick}>
-              <span className="button-text">again</span>
-              <span className="icon-arrow-right button-icon"></span>
+              onClick={this.handleOnClick}
+            >
+              <span className="button-text">
+                again
+              </span>
+              <span className="icon-arrow-right button-icon" />
             </button>
           </div>
         </div>
-      <div className="image-container">
-        <div className="image-content">
-          {this.props.imageData ? <img src={ this.props.imageData.image.src } className="image-invisible"/> : null}
-          <canvas id="input-canvas" ref="inputCanvas"></canvas>
+        <div className="image-container">
+          <div className="image-content">
+            {imageData ? <img src={image.src} alt="result" className="image-invisible" /> : null}
+            <canvas id="input-canvas" ref={this.inputCanvas} />
+          </div>
         </div>
       </div>
-    </div>
-    )
+    );
   }
 }
+
+ResultPage.defaultProps = {
+  imageData: null,
+  history: {},
+  setImageData: () => {},
+};
+
+ResultPage.propTypes = {
+  imageData: PropTypes.shape({
+    image: PropTypes.object,
+  }),
+  history: PropTypes.object,
+  setImageData: PropTypes.func,
+};
 
 export default ResultPage;
